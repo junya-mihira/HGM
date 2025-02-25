@@ -1,3 +1,5 @@
+//by Junya Mihira
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -7,11 +9,25 @@
 
 #define MAX_ROWS 50  // (csvのデータ数が50まで対応今回はN=30)最大行数の仮設定(ゆとりをもつ)
 // 3次元のパラメータ空間で(μ1,μ2,k)=(at,bt,ct)にそって最尤推定を行う
-//a,b,x1,x2,x3はデータから事前に計算した(尤度関数のPfaffianに必要なため)
-double a = 1, b, c, t0=0.1;//b = 4.266792032852375
-double x1 = 0.5697013370597034, x2 = 0.43029866294029656, x3 = 0.16508059376762182;
+//x1,x2,x3は与えられたデータから計算する(尤度関数のPfaffianに必要なため)
+double a = 1, b, c, t0=0.1;
+double x1,x2,x3;
+double x_data[3]={0,0,0};
 
-// 尤度関数Lを計算(2次元の場合) c*tでκを表す, colsは変数に次元rowsはデータサイズ
+//x1,x2,x3を計算する関数
+double* data_calc(double **x, int rows, int cols, double *x_arr){
+    for (int i=0; i<rows; i++){
+        x_arr[0]+= (x[i][0])*(x[i][0]);
+        x_arr[1]+= (x[i][1])*(x[i][1]);
+        x_arr[2]+= (x[i][0])*(x[i][1]);
+    }
+    x_arr[0]=x_arr[0]/rows;
+    x_arr[1]=x_arr[1]/rows;
+    x_arr[2]=x_arr[2]/rows;
+    return x_arr;
+}
+
+// 尤度関数Lを計算(2次元の場合) c*tでκを表す, rowsはデータサイズ,colsはμの次元
 double calculate_function(double **x, int rows, int cols, double a, double b, double c, double t) {
     double mu[cols];
     double sum = 0.0;
@@ -111,6 +127,12 @@ int main(void) {
     }
     fclose(file);
 
+    //x_arr計算
+    double* x_arr =data_calc(x,rows,cols,x_data);
+    x1=x_arr[0];
+    x2=x_arr[1];
+    x3=x_arr[2];
+
     //
     for (double B=0.1; B<10.0; B+=0.1){
     for (int C=1; C<=1000;C++){
@@ -175,9 +197,11 @@ int main(void) {
     gsl_odeiv2_driver_free(d);
 }
     }
+
     for (int i = 0; i < rows; i++) {
         free(x[i]);  //　最後にメモリ解法
     }
+
 
     printf("尤度関数の最小値 CL=%g, at t=%g, μ1=%g, μ2=%g, k=%g, a=%d, b=%g, c=%g", min_y0, best_t, best_t, best_t*best_b, best_k, 1, best_b, best_c);
     return 0;
