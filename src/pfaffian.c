@@ -170,20 +170,19 @@ int main(void) {
             double y[2] = {CL, KCL};  // ベクトル値関数の初期値をクンマーの合流超幾何級数から計算
             for (double ti = t ; ti <= t1; ti += 0.01) {  // ステップサイズ0.01固定
                 if (y[0] < 0.1 && y[1] < 0.1) {
-                printf("f[0] and f[1] are both less than 0.1 at t = %g. Ending simulation.\n", t);
-                break;
-            }
-            //パラメータμに関して単位円周上付近でMLEを計算
-            if(ti*ti*(1+b*b)<0.1 || 1.1<ti*ti*(1+b*b)){
-                break;
-            }
-            int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
-            if (status != GSL_SUCCESS) {
-                printf("Error: solver failed at t = %g\n", ti);
-                break;
-            }
-
-            printf("t = %g, CL(t) = %g, dkCL(t) = %g, k=%g\n", t, y[0], y[1],c*t);
+                    printf("f[0] and f[1] are both less than 0.1 at t = %g. Ending simulation.\n", t);
+                    break;
+                }
+                //パラメータμに関して単位円周上付近でMLEを計算
+                if(ti*ti*(1+b*b)<0.1 || 1.1<ti*ti*(1+b*b)){
+                    break;
+                }
+                int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
+                if (status != GSL_SUCCESS) {
+                    printf("Error: solver failed at t = %g\n", ti);
+                    break;
+                }
+                printf("t = %g, CL(t) = %g, dkCL(t) = %g, k=%g\n", t, y[0], y[1],c*t);
             }
             if (y[0]<min_y0){
                 min_y0=y[0];  //尤度関数CLの最小値.
@@ -200,7 +199,7 @@ int main(void) {
     for (int i = 0; i < rows; i++) {
         free(x[i]);  
     }
-
+    // 最尤推定量を表示.
     printf("尤度関数の最小値 CL=%g, at t=%g, μ1=%g, μ2=%g, k=%g, a=%d, b=%g, c=%g", min_y0, best_t, best_t, best_t*best_b, best_k, 1, best_b, best_c);
     return 0;
 }
